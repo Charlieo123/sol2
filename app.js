@@ -1,32 +1,32 @@
-const connectButton = document.getElementById('connectButton');
-const walletInfo = document.getElementById('walletInfo');
+import React from 'react';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { clusterApiUrl } from '@solana/web3.js';
 
-connectButton.addEventListener('click', async () => {
-    try {
-        // Check if Phantom is installed
-        if ('solana' in window) {
-            const provider = window.solana;
-            if (provider.isPhantom) {
-                // Try to connect to the wallet
-                const response = await window.solana.connect();
-                const publicKey = response.publicKey.toString();
+// Default styles that can be overridden by your app's styles
+require('@solana/wallet-adapter-react-ui/styles.css');
 
-                // Display the public key
-                walletInfo.innerHTML = `Connected wallet public key: ${publicKey}`;
+const App = () => {
+    // Set up the network to connect to
+    const network = clusterApiUrl('mainnet-beta');
 
-                // Fetch balance
-                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
-                const balance = await connection.getBalance(new solanaWeb3.PublicKey(publicKey));
+    // Set up wallets to connect to
+    const wallets = [new PhantomWalletAdapter()];
 
-                // Convert balance (which is in lamports) to SOL
-                const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
-                walletInfo.innerHTML += `<br>Balance: ${solBalance.toFixed(2)} SOL`;
-            }
-        } else {
-            alert('Phantom wallet is not installed!');
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Failed to connect');
-    }
-});
+    return (
+        <ConnectionProvider endpoint={network}>
+            <WalletProvider wallets={wallets} autoConnect>
+                <WalletModalProvider>
+                    {/* Your app's components go here, along with the WalletMultiButton for connecting */}
+                    <div>
+                        <WalletMultiButton />
+                        {/* Additional UI components and content */}
+                    </div>
+                </WalletModalProvider>
+            </WalletProvider>
+        </ConnectionProvider>
+    );
+};
+
+export default App;
